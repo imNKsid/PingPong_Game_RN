@@ -14,7 +14,9 @@ const SPEED = 30; //0.3;
 const Home = () => {
   const targetPositionX = useSharedValue(200);
   const targetPositionY = useSharedValue(200);
-  const direction = useSharedValue(normalizeVector({ x: 0, y: -1 }));
+  const direction = useSharedValue(
+    normalizeVector({ x: Math.random(), y: Math.random() })
+  );
 
   const { height, width } = useWindowDimensions();
 
