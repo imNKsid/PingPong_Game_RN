@@ -9,7 +9,8 @@ import Animated, {
 
 const FPS = 60;
 const DELTA = 1000 / FPS;
-const SPEED = 30; //0.3;
+const SPEED = 3; //0.3;
+const BALL_WIDTH = 25;
 
 const Home = () => {
   const targetPositionX = useSharedValue(200);
@@ -30,11 +31,11 @@ const Home = () => {
     const nextX = targetPositionX.value + direction.value.x * SPEED;
     const nextY = targetPositionY.value + direction.value.y * SPEED;
 
-    if (nextY < 0 || nextY > height) {
+    if (nextY < 0 || nextY > height - BALL_WIDTH) {
       console.log("Ball hits the vertical wall");
       direction.value = { x: direction.value.x, y: -direction.value.y };
     }
-    if (nextX < 0 || nextX > width) {
+    if (nextX < 0 || nextX > width - BALL_WIDTH) {
       console.log("Ball hits the horizontal wall");
       direction.value = { x: -direction.value.x, y: direction.value.y };
     }
@@ -82,7 +83,7 @@ const normalizeVector = (vector) => {
 const styles = StyleSheet.create({
   ball: {
     backgroundColor: "#000",
-    width: 25,
+    width: BALL_WIDTH,
     aspectRatio: 1,
     borderRadius: 25,
     position: "absolute",
