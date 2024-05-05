@@ -1,13 +1,43 @@
 import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
+  withTiming,
 } from "react-native-reanimated";
+
+const FPS = 60;
+const DELTA = 1000 / FPS;
+const SPEED = 1; //0.3;
 
 const Home = () => {
   const targetPositionX = useSharedValue(0);
   const targetPositionY = useSharedValue(0);
+  const direction = useSharedValue(normalizeVector({ x: 0, y: -1 }));
+
+  useEffect(() => {
+    const interval = setInterval(update, DELTA);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const update = () => {
+    targetPositionX.value = withTiming(
+      targetPositionX.value + direction.value.x * SPEED,
+      {
+        duration: DELTA,
+        easing: Easing.linear,
+      }
+    );
+    targetPositionY.value = withTiming(
+      targetPositionY.value + direction.value.y * SPEED,
+      {
+        duration: DELTA,
+        easing: Easing.linear,
+      }
+    );
+  };
 
   const ballAnimatedStyles = useAnimatedStyle(() => {
     return {
@@ -24,6 +54,20 @@ const Home = () => {
 };
 
 export default Home;
+
+const normalizeVector = (vector) => {
+  console.log("vector =>", vector);
+  const magnitude = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+  console.log("magnitude =>", magnitude);
+  console.log("direction =>", {
+    x: vector.x / magnitude,
+    y: vector.y / magnitude,
+  });
+  return {
+    x: vector.x / magnitude,
+    y: vector.y / magnitude,
+  };
+};
 
 const styles = StyleSheet.create({
   ball: {
