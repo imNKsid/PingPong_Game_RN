@@ -39,20 +39,14 @@ const Home = () => {
       direction.value = { x: -direction.value.x, y: direction.value.y };
     }
 
-    targetPositionX.value = withTiming(
-      targetPositionX.value + direction.value.x * SPEED,
-      {
-        duration: DELTA,
-        easing: Easing.linear,
-      }
-    );
-    targetPositionY.value = withTiming(
-      targetPositionY.value + direction.value.y * SPEED,
-      {
-        duration: DELTA,
-        easing: Easing.linear,
-      }
-    );
+    targetPositionX.value = withTiming(nextX, {
+      duration: DELTA,
+      easing: Easing.linear,
+    });
+    targetPositionY.value = withTiming(nextY, {
+      duration: DELTA,
+      easing: Easing.linear,
+    });
   };
 
   const ballAnimatedStyles = useAnimatedStyle(() => {
