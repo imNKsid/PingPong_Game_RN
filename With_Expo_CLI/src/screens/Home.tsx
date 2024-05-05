@@ -9,7 +9,7 @@ import Animated, {
 
 const FPS = 60;
 const DELTA = 1000 / FPS;
-const SPEED = 1; //0.3;
+const SPEED = 30; //0.3;
 
 const Home = () => {
   const targetPositionX = useSharedValue(200);
@@ -31,6 +31,10 @@ const Home = () => {
     if (nextY < 0 || nextY > height) {
       console.log("Ball hits the vertical wall");
       direction.value = { x: direction.value.x, y: -direction.value.y };
+    }
+    if (nextX < 0 || nextX > width) {
+      console.log("Ball hits the horizontal wall");
+      direction.value = { x: -direction.value.x, y: direction.value.y };
     }
 
     targetPositionX.value = withTiming(
