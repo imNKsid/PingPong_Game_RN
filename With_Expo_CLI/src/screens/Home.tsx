@@ -1,10 +1,24 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 
 const Home = () => {
+  const targetPositionX = useSharedValue(0);
+  const targetPositionY = useSharedValue(0);
+
+  const ballAnimatedStyles = useAnimatedStyle(() => {
+    return {
+      top: targetPositionY.value,
+      left: targetPositionX.value,
+    };
+  });
+
   return (
     <View>
-      <View style={styles.ball} />
+      <Animated.View style={[styles.ball, ballAnimatedStyles]} />
     </View>
   );
 };
