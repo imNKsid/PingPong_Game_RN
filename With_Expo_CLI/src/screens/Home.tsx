@@ -9,7 +9,7 @@ import Animated, {
 
 const FPS = 60;
 const DELTA = 1000 / FPS;
-const SPEED = 3; //0.3;
+const SPEED = 10; //0.3;
 const BALL_WIDTH = 25;
 
 const Home = () => {
@@ -28,26 +28,36 @@ const Home = () => {
   }, []);
 
   const update = () => {
-    const nextX = targetPositionX.value + direction.value.x * SPEED;
-    const nextY = targetPositionY.value + direction.value.y * SPEED;
+    let nextPos = getNextPos(direction.value);
 
-    if (nextY < 0 || nextY > height - BALL_WIDTH) {
-      console.log("Ball hits the vertical wall");
-      direction.value = { x: direction.value.x, y: -direction.value.y };
+    if (nextPos.y < 0 || nextPos.y > height - BALL_WIDTH) {
+      // Ball hits the vertical wall
+      const newDirection = { x: direction.value.x, y: -direction.value.y };
+      direction.value = newDirection;
+      nextPos = getNextPos(newDirection);
     }
-    if (nextX < 0 || nextX > width - BALL_WIDTH) {
-      console.log("Ball hits the horizontal wall");
-      direction.value = { x: -direction.value.x, y: direction.value.y };
+    if (nextPos.x < 0 || nextPos.x > width - BALL_WIDTH) {
+      // Ball hits the horizontal wall
+      const newDirection = { x: -direction.value.x, y: direction.value.y };
+      direction.value = newDirection;
+      nextPos = getNextPos(newDirection);
     }
 
-    targetPositionX.value = withTiming(nextX, {
+    targetPositionX.value = withTiming(nextPos.x, {
       duration: DELTA,
       easing: Easing.linear,
     });
-    targetPositionY.value = withTiming(nextY, {
+    targetPositionY.value = withTiming(nextPos.y, {
       duration: DELTA,
       easing: Easing.linear,
     });
+  };
+
+  const getNextPos = (dir: { x: any; y: any }) => {
+    return {
+      x: targetPositionX.value + dir.x * SPEED,
+      y: targetPositionY.value + dir.y * SPEED,
+    };
   };
 
   const ballAnimatedStyles = useAnimatedStyle(() => {
@@ -67,13 +77,8 @@ const Home = () => {
 export default Home;
 
 const normalizeVector = (vector) => {
-  console.log("vector =>", vector);
   const magnitude = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
-  console.log("magnitude =>", magnitude);
-  console.log("direction =>", {
-    x: vector.x / magnitude,
-    y: vector.y / magnitude,
-  });
+
   return {
     x: vector.x / magnitude,
     y: vector.y / magnitude,
