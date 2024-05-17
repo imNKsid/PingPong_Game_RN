@@ -2,10 +2,12 @@ import { Dimensions, StyleSheet, View } from "react-native";
 import React, { useEffect } from "react";
 import Animated, {
   Easing,
+  useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { PanGestureHandler } from "react-native-gesture-handler";
 
 const { height, width } = Dimensions.get("window");
 
@@ -15,8 +17,6 @@ const SPEED = 10; //0.3;
 const BALL_WIDTH = 25;
 const ISLAND_DIMENSIONS = { x: 151, y: 10, w: 128, h: 40 };
 const PLAYER_DIMENSIONS = {
-  x: width / 4,
-  y: height - 100,
   w: width / 2,
   h: 40,
 };
@@ -27,6 +27,7 @@ const Home = () => {
   const direction = useSharedValue(
     normalizeVector({ x: Math.random(), y: Math.random() })
   );
+  const playerPos = useSharedValue({ x: width / 4, y: height - 100 });
 
   // const { height, width } = useWindowDimensions();
 
@@ -68,6 +69,25 @@ const Home = () => {
         newDirection = { x: direction.value.x, y: -direction.value.y };
       }
     }
+
+    //Player hit detection
+    if (
+      nextPos.x < playerPos.value.x + PLAYER_DIMENSIONS.w &&
+      nextPos.x + BALL_WIDTH > playerPos.value.x &&
+      nextPos.y < playerPos.value.y + PLAYER_DIMENSIONS.h &&
+      BALL_WIDTH + nextPos.y > playerPos.value.y
+    ) {
+      if (
+        targetPositionX.value < playerPos.value.x ||
+        targetPositionX.value > playerPos.value.x + PLAYER_DIMENSIONS.w
+      ) {
+        //Hitting from the side
+        newDirection = { x: -direction.value.x, y: direction.value.y };
+      } else {
+        //Hitting the top/bottom
+        newDirection = { x: direction.value.x, y: -direction.value.y };
+      }
+    }
     direction.value = newDirection;
     nextPos = getNextPos(newDirection);
 
@@ -95,11 +115,47 @@ const Home = () => {
     };
   });
 
+  const gestureHandler = useAnimatedGestureHandler({
+    onStart: () => {},
+    onActive: (event) => {
+      playerPos.value = {
+        ...playerPos.value,
+        x: event.absoluteX - PLAYER_DIMENSIONS.w / 2,
+      };
+    },
+  });
+
+  const playerAnimatedStyles = useAnimatedStyle(() => {
+    return {
+      left: playerPos.value.x,
+    };
+  });
+
   return (
     <>
       <Animated.View style={[styles.ball, ballAnimatedStyles]} />
+      {/* Dynamic Island */}
       <View style={styles.dynamicIsland} />
-      <Animated.View style={styles.player} />
+      {/* Player */}
+      <Animated.View
+        style={[
+          styles.player,
+          { top: playerPos.value.y, left: playerPos.value.x },
+          playerAnimatedStyles,
+        ]}
+      />
+      {/* Gesture Area */}
+      <PanGestureHandler onGestureEvent={gestureHandler}>
+        <Animated.View
+          style={{
+            width: "100%",
+            height: 100,
+            // backgroundColor: "red",
+            position: "absolute",
+            bottom: 0,
+          }}
+        />
+      </PanGestureHandler>
     </>
   );
 };
@@ -135,8 +191,6 @@ const styles = StyleSheet.create({
     width: PLAYER_DIMENSIONS.w,
     backgroundColor: "#000",
     position: "absolute",
-    top: PLAYER_DIMENSIONS.y,
-    left: PLAYER_DIMENSIONS.x,
     borderRadius: 20,
   },
 });
