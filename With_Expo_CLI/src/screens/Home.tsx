@@ -1,4 +1,4 @@
-import { StyleSheet, useWindowDimensions } from "react-native";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
 import React, { useEffect } from "react";
 import Animated, {
   Easing,
@@ -11,6 +11,7 @@ const FPS = 60;
 const DELTA = 1000 / FPS;
 const SPEED = 10; //0.3;
 const BALL_WIDTH = 25;
+const ISLAND_DIMENSIONS = { x: 151, y: 10, w: 128, h: 40 };
 
 const Home = () => {
   const targetPositionX = useSharedValue(200);
@@ -43,6 +44,29 @@ const Home = () => {
       nextPos = getNextPos(newDirection);
     }
 
+    if (
+      nextPos.x < ISLAND_DIMENSIONS.x + ISLAND_DIMENSIONS.w &&
+      nextPos.x + BALL_WIDTH > ISLAND_DIMENSIONS.x &&
+      nextPos.y < ISLAND_DIMENSIONS.y + ISLAND_DIMENSIONS.h &&
+      BALL_WIDTH + nextPos.y > ISLAND_DIMENSIONS.y
+    ) {
+      if (
+        targetPositionX.value < ISLAND_DIMENSIONS.x ||
+        targetPositionX.value > ISLAND_DIMENSIONS.x + ISLAND_DIMENSIONS.w
+      ) {
+        //Hitting from the side
+        const newDirection = { x: -direction.value.x, y: direction.value.y };
+        direction.value = newDirection;
+        nextPos = getNextPos(newDirection);
+      } else {
+        //Hitting the top/bottom
+        const newDirection = { x: direction.value.x, y: -direction.value.y };
+        direction.value = newDirection;
+        nextPos = getNextPos(newDirection);
+      }
+    } else {
+    }
+
     targetPositionX.value = withTiming(nextPos.x, {
       duration: DELTA,
       easing: Easing.linear,
@@ -70,11 +94,10 @@ const Home = () => {
   return (
     <>
       <Animated.View style={[styles.ball, ballAnimatedStyles]} />
+      <View style={styles.dynamicIsland} />
     </>
   );
 };
-
-export default Home;
 
 const normalizeVector = (vector) => {
   const magnitude = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
@@ -93,4 +116,15 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     position: "absolute",
   },
+  dynamicIsland: {
+    height: ISLAND_DIMENSIONS.h,
+    width: ISLAND_DIMENSIONS.w,
+    backgroundColor: "#000",
+    position: "absolute",
+    top: ISLAND_DIMENSIONS.y,
+    left: ISLAND_DIMENSIONS.x,
+    borderRadius: 20,
+  },
 });
+
+export default Home;
