@@ -30,20 +30,19 @@ const Home = () => {
 
   const update = () => {
     let nextPos = getNextPos(direction.value);
+    let newDirection = direction.value;
 
+    //Wall hit detection
     if (nextPos.y < 0 || nextPos.y > height - BALL_WIDTH) {
       // Ball hits the vertical wall
-      const newDirection = { x: direction.value.x, y: -direction.value.y };
-      direction.value = newDirection;
-      nextPos = getNextPos(newDirection);
+      newDirection = { x: direction.value.x, y: -direction.value.y };
     }
     if (nextPos.x < 0 || nextPos.x > width - BALL_WIDTH) {
       // Ball hits the horizontal wall
-      const newDirection = { x: -direction.value.x, y: direction.value.y };
-      direction.value = newDirection;
-      nextPos = getNextPos(newDirection);
+      newDirection = { x: -direction.value.x, y: direction.value.y };
     }
 
+    //Dynamic Island hit detection
     if (
       nextPos.x < ISLAND_DIMENSIONS.x + ISLAND_DIMENSIONS.w &&
       nextPos.x + BALL_WIDTH > ISLAND_DIMENSIONS.x &&
@@ -55,17 +54,14 @@ const Home = () => {
         targetPositionX.value > ISLAND_DIMENSIONS.x + ISLAND_DIMENSIONS.w
       ) {
         //Hitting from the side
-        const newDirection = { x: -direction.value.x, y: direction.value.y };
-        direction.value = newDirection;
-        nextPos = getNextPos(newDirection);
+        newDirection = { x: -direction.value.x, y: direction.value.y };
       } else {
         //Hitting the top/bottom
-        const newDirection = { x: direction.value.x, y: -direction.value.y };
-        direction.value = newDirection;
-        nextPos = getNextPos(newDirection);
+        newDirection = { x: direction.value.x, y: -direction.value.y };
       }
-    } else {
     }
+    direction.value = newDirection;
+    nextPos = getNextPos(newDirection);
 
     targetPositionX.value = withTiming(nextPos.x, {
       duration: DELTA,
