@@ -1,4 +1,4 @@
-import { StyleSheet, View, useWindowDimensions } from "react-native";
+import { Dimensions, StyleSheet, View } from "react-native";
 import React, { useEffect } from "react";
 import Animated, {
   Easing,
@@ -7,11 +7,19 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
+const { height, width } = Dimensions.get("window");
+
 const FPS = 60;
 const DELTA = 1000 / FPS;
 const SPEED = 10; //0.3;
 const BALL_WIDTH = 25;
 const ISLAND_DIMENSIONS = { x: 151, y: 10, w: 128, h: 40 };
+const PLAYER_DIMENSIONS = {
+  x: width / 4,
+  y: height - 100,
+  w: width / 2,
+  h: 40,
+};
 
 const Home = () => {
   const targetPositionX = useSharedValue(200);
@@ -20,7 +28,7 @@ const Home = () => {
     normalizeVector({ x: Math.random(), y: Math.random() })
   );
 
-  const { height, width } = useWindowDimensions();
+  // const { height, width } = useWindowDimensions();
 
   useEffect(() => {
     const interval = setInterval(update, DELTA);
@@ -91,6 +99,7 @@ const Home = () => {
     <>
       <Animated.View style={[styles.ball, ballAnimatedStyles]} />
       <View style={styles.dynamicIsland} />
+      <Animated.View style={styles.player} />
     </>
   );
 };
@@ -119,6 +128,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: ISLAND_DIMENSIONS.y,
     left: ISLAND_DIMENSIONS.x,
+    borderRadius: 20,
+  },
+  player: {
+    height: PLAYER_DIMENSIONS.h,
+    width: PLAYER_DIMENSIONS.w,
+    backgroundColor: "#000",
+    position: "absolute",
+    top: PLAYER_DIMENSIONS.y,
+    left: PLAYER_DIMENSIONS.x,
     borderRadius: 20,
   },
 });
