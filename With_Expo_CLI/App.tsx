@@ -1,14 +1,17 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Home } from "./src/screens";
 
 const App = () => {
   return (
-    <View style={styles.container}>
-      <Home />
-      <StatusBar style="auto" />
-    </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <Home />
+        <StatusBar style="auto" />
+      </View>
+    </GestureHandlerRootView>
   );
 };
 
