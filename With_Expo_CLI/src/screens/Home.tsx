@@ -1,5 +1,5 @@
-import { Dimensions, StyleSheet, View } from "react-native";
-import React, { useEffect } from "react";
+import { Dimensions, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
 import Animated, {
   Easing,
   useAnimatedGestureHandler,
@@ -29,7 +29,7 @@ const Home = () => {
   );
   const playerPos = useSharedValue({ x: width / 4, y: height - 100 });
 
-  // const { height, width } = useWindowDimensions();
+  const [score, setScore] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(update, DELTA);
@@ -68,6 +68,7 @@ const Home = () => {
         //Hitting the top/bottom
         newDirection = { x: direction.value.x, y: -direction.value.y };
       }
+      setScore((prev) => prev + 1);
     }
 
     //Player hit detection
@@ -133,6 +134,7 @@ const Home = () => {
 
   return (
     <>
+      <Text style={styles.scoreStyle}>{score}</Text>
       <Animated.View style={[styles.ball, ballAnimatedStyles]} />
       {/* Dynamic Island */}
       <View style={styles.dynamicIsland} />
@@ -192,6 +194,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
     position: "absolute",
     borderRadius: 20,
+  },
+  scoreStyle: {
+    fontSize: 120,
+    fontWeight: "500",
+    position: "absolute",
+    top: 150,
+    color: "lightgray",
   },
 });
 
