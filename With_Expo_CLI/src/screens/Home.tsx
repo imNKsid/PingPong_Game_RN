@@ -1,4 +1,4 @@
-import { StyleSheet, useWindowDimensions } from "react-native";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
 import React, { useEffect } from "react";
 import Animated, {
   Easing,
@@ -9,8 +9,9 @@ import Animated, {
 
 const FPS = 60;
 const DELTA = 1000 / FPS;
-const SPEED = 3; //0.3;
+const SPEED = 10; //0.3;
 const BALL_WIDTH = 25;
+const ISLAND_DIMENSIONS = { x: 151, y: 10, w: 128, h: 40 };
 
 const Home = () => {
   const targetPositionX = useSharedValue(200);
@@ -28,26 +29,59 @@ const Home = () => {
   }, []);
 
   const update = () => {
-    const nextX = targetPositionX.value + direction.value.x * SPEED;
-    const nextY = targetPositionY.value + direction.value.y * SPEED;
+    let nextPos = getNextPos(direction.value);
 
-    if (nextY < 0 || nextY > height - BALL_WIDTH) {
-      console.log("Ball hits the vertical wall");
-      direction.value = { x: direction.value.x, y: -direction.value.y };
+    if (nextPos.y < 0 || nextPos.y > height - BALL_WIDTH) {
+      // Ball hits the vertical wall
+      const newDirection = { x: direction.value.x, y: -direction.value.y };
+      direction.value = newDirection;
+      nextPos = getNextPos(newDirection);
     }
-    if (nextX < 0 || nextX > width - BALL_WIDTH) {
-      console.log("Ball hits the horizontal wall");
-      direction.value = { x: -direction.value.x, y: direction.value.y };
+    if (nextPos.x < 0 || nextPos.x > width - BALL_WIDTH) {
+      // Ball hits the horizontal wall
+      const newDirection = { x: -direction.value.x, y: direction.value.y };
+      direction.value = newDirection;
+      nextPos = getNextPos(newDirection);
     }
 
-    targetPositionX.value = withTiming(nextX, {
+    if (
+      nextPos.x < ISLAND_DIMENSIONS.x + ISLAND_DIMENSIONS.w &&
+      nextPos.x + BALL_WIDTH > ISLAND_DIMENSIONS.x &&
+      nextPos.y < ISLAND_DIMENSIONS.y + ISLAND_DIMENSIONS.h &&
+      BALL_WIDTH + nextPos.y > ISLAND_DIMENSIONS.y
+    ) {
+      if (
+        targetPositionX.value < ISLAND_DIMENSIONS.x ||
+        targetPositionX.value > ISLAND_DIMENSIONS.x + ISLAND_DIMENSIONS.w
+      ) {
+        //Hitting from the side
+        const newDirection = { x: -direction.value.x, y: direction.value.y };
+        direction.value = newDirection;
+        nextPos = getNextPos(newDirection);
+      } else {
+        //Hitting the top/bottom
+        const newDirection = { x: direction.value.x, y: -direction.value.y };
+        direction.value = newDirection;
+        nextPos = getNextPos(newDirection);
+      }
+    } else {
+    }
+
+    targetPositionX.value = withTiming(nextPos.x, {
       duration: DELTA,
       easing: Easing.linear,
     });
-    targetPositionY.value = withTiming(nextY, {
+    targetPositionY.value = withTiming(nextPos.y, {
       duration: DELTA,
       easing: Easing.linear,
     });
+  };
+
+  const getNextPos = (dir: { x: any; y: any }) => {
+    return {
+      x: targetPositionX.value + dir.x * SPEED,
+      y: targetPositionY.value + dir.y * SPEED,
+    };
   };
 
   const ballAnimatedStyles = useAnimatedStyle(() => {
@@ -60,20 +94,14 @@ const Home = () => {
   return (
     <>
       <Animated.View style={[styles.ball, ballAnimatedStyles]} />
+      <View style={styles.dynamicIsland} />
     </>
   );
 };
 
-export default Home;
-
 const normalizeVector = (vector) => {
-  console.log("vector =>", vector);
   const magnitude = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
-  console.log("magnitude =>", magnitude);
-  console.log("direction =>", {
-    x: vector.x / magnitude,
-    y: vector.y / magnitude,
-  });
+
   return {
     x: vector.x / magnitude,
     y: vector.y / magnitude,
@@ -88,4 +116,15 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     position: "absolute",
   },
+  dynamicIsland: {
+    height: ISLAND_DIMENSIONS.h,
+    width: ISLAND_DIMENSIONS.w,
+    backgroundColor: "#000",
+    position: "absolute",
+    top: ISLAND_DIMENSIONS.y,
+    left: ISLAND_DIMENSIONS.x,
+    borderRadius: 20,
+  },
 });
+
+export default Home;
