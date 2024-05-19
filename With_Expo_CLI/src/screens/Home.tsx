@@ -3,12 +3,11 @@ import React, { useEffect, useState } from "react";
 import Animated, {
   BounceIn,
   Easing,
-  useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { PanGestureHandler } from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 const { height, width } = Dimensions.get("window");
 
@@ -126,15 +125,14 @@ const Home = () => {
     };
   });
 
-  const gestureHandler = useAnimatedGestureHandler({
-    onStart: () => {},
-    onActive: (event) => {
+  const onDrag = Gesture.Pan()
+    .onBegin(() => {})
+    .onChange((event) => {
       playerPos.value = {
         ...playerPos.value,
         x: event.absoluteX - PLAYER_DIMENSIONS.w / 2,
       };
-    },
-  });
+    });
 
   const playerAnimatedStyles = useAnimatedStyle(() => {
     return {
@@ -182,7 +180,7 @@ const Home = () => {
       />
 
       {/* Gesture Area */}
-      <PanGestureHandler onGestureEvent={gestureHandler}>
+      <GestureDetector gesture={onDrag}>
         <Animated.View
           style={{
             width: "100%",
@@ -192,7 +190,7 @@ const Home = () => {
             bottom: 0,
           }}
         />
-      </PanGestureHandler>
+      </GestureDetector>
     </>
   );
 };
