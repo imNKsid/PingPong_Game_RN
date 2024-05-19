@@ -5,6 +5,7 @@ import Animated, {
   useAnimatedGestureHandler,
   useAnimatedStyle,
   useSharedValue,
+  withSequence,
   withTiming,
 } from "react-native-reanimated";
 import { PanGestureHandler } from "react-native-gesture-handler";
@@ -141,6 +142,24 @@ const Home = () => {
     };
   });
 
+  const islandAnimatedStyles = useAnimatedStyle(
+    () => ({
+      width: withSequence(
+        withTiming(ISLAND_DIMENSIONS.w * 1.2, { duration: 100 }),
+        withTiming(ISLAND_DIMENSIONS.w, { duration: 100 })
+      ),
+      height: withSequence(
+        withTiming(ISLAND_DIMENSIONS.h * 1.2, { duration: 100 }),
+        withTiming(ISLAND_DIMENSIONS.h, { duration: 100 })
+      ),
+      opacity: withSequence(
+        withTiming(0, { duration: 100 }),
+        withTiming(1, { duration: 100 })
+      ),
+    }),
+    [score]
+  );
+
   const restartGame = () => {
     targetPositionX.value = 200;
     targetPositionY.value = 200;
@@ -166,6 +185,14 @@ const Home = () => {
 
       {/* Dynamic Island */}
       <View style={styles.dynamicIsland} />
+      <View style={styles.dynamicIslandAnimation}>
+        <Animated.View
+          style={[
+            { borderRadius: 50, backgroundColor: "#000" },
+            islandAnimatedStyles,
+          ]}
+        />
+      </View>
       {/* Player */}
       <Animated.View
         style={[
@@ -215,6 +242,14 @@ const styles = StyleSheet.create({
     top: ISLAND_DIMENSIONS.y,
     left: ISLAND_DIMENSIONS.x,
     borderRadius: 20,
+  },
+  dynamicIslandAnimation: {
+    position: "absolute",
+    top: 0,
+    width: ISLAND_DIMENSIONS.w + 50,
+    height: ISLAND_DIMENSIONS.h + 20,
+    alignItems: "center",
+    justifyContent: "center",
   },
   player: {
     height: PLAYER_DIMENSIONS.h,
