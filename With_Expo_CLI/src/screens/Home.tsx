@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, Text, View } from "react-native";
+import { Button, Dimensions, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import Animated, {
   Easing,
@@ -30,20 +30,29 @@ const Home = () => {
   const playerPos = useSharedValue({ x: width / 4, y: height - 100 });
 
   const [score, setScore] = useState(0);
+  const [gameOver, setGameOver] = useState(false);
 
   useEffect(() => {
-    const interval = setInterval(update, DELTA);
+    const interval = setInterval(() => {
+      if (!gameOver) {
+        update();
+      }
+    }, DELTA);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [gameOver]);
 
   const update = () => {
     let nextPos = getNextPos(direction.value);
     let newDirection = direction.value;
 
     //Wall hit detection
-    if (nextPos.y < 0 || nextPos.y > height - BALL_WIDTH) {
-      // Ball hits the vertical wall
+    if (nextPos.y > height - BALL_WIDTH) {
+      // Ball hits the bottom wall
+      setGameOver(true);
+    }
+    if (nextPos.y < 0) {
+      // Ball hits the top wall
       newDirection = { x: direction.value.x, y: -direction.value.y };
     }
     if (nextPos.x < 0 || nextPos.x > width - BALL_WIDTH) {
@@ -132,10 +141,29 @@ const Home = () => {
     };
   });
 
+  const restartGame = () => {
+    targetPositionX.value = 200;
+    targetPositionY.value = 200;
+    setScore(0);
+    setGameOver(false);
+  };
+
   return (
     <>
       <Text style={styles.scoreStyle}>{score}</Text>
-      <Animated.View style={[styles.ball, ballAnimatedStyles]} />
+      {gameOver ? (
+        <Text style={styles.gameOverStyle}>{"Game Over!"}</Text>
+      ) : null}
+      {gameOver ? null : (
+        <Animated.View style={[styles.ball, ballAnimatedStyles]} />
+      )}
+      {gameOver ? (
+        <>
+          {/* <Text style={styles.gameOverStyle}>{"Game Over!"}</Text> */}
+          <Button title="Restart" onPress={restartGame} />
+        </>
+      ) : null}
+
       {/* Dynamic Island */}
       <View style={styles.dynamicIsland} />
       {/* Player */}
@@ -199,8 +227,15 @@ const styles = StyleSheet.create({
     fontSize: 120,
     fontWeight: "500",
     position: "absolute",
-    top: 150,
+    top: 300,
     color: "lightgray",
+  },
+  gameOverStyle: {
+    fontSize: 50,
+    fontWeight: "500",
+    position: "absolute",
+    top: 230,
+    color: "red",
   },
 });
 
