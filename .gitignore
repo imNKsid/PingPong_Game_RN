@@ -4,3 +4,9 @@ With_Expo_CLI/.DS_Store
 With_Expo_CLI/yarn.lock
 yarn.lock
 .gitignore
+With_RN_CLI/.DS_Store
+With_RN_CLI/yarn.lock
+With_RN_CLI/node_modules
+# With_RN_CLI/*
+# With_Expo_CLI/*
+With_RN_CLI/ios/*
