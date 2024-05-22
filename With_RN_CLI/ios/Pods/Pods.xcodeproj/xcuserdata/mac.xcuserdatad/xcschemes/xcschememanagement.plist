@@ -69,12 +69,12 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Pods-BoilerPlate-BoilerPlateTests.xcscheme</key>
+		<key>Pods-PingPong-PingPongTests.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Pods-BoilerPlate.xcscheme</key>
+		<key>Pods-PingPong.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
@@ -90,6 +90,16 @@
 			<false/>
 		</dict>
 		<key>RCTTypeSafety.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>RNGestureHandler.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>RNReanimated.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>

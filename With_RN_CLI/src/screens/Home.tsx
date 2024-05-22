@@ -21,6 +21,8 @@ const PLAYER_DIMENSIONS = {
   h: 40,
 };
 
+let collided = false; //Variable taken for Dynamic Island collision detection
+
 const Home = () => {
   const targetPositionX = useSharedValue(200);
   const targetPositionY = useSharedValue(200);
@@ -67,17 +69,23 @@ const Home = () => {
       nextPos.y < ISLAND_DIMENSIONS.y + ISLAND_DIMENSIONS.h &&
       BALL_WIDTH + nextPos.y > ISLAND_DIMENSIONS.y
     ) {
-      if (
-        targetPositionX.value < ISLAND_DIMENSIONS.x ||
-        targetPositionX.value > ISLAND_DIMENSIONS.x + ISLAND_DIMENSIONS.w
-      ) {
-        //Hitting from the side
-        newDirection = { x: -direction.value.x, y: direction.value.y };
-      } else {
-        //Hitting the top/bottom
-        newDirection = { x: direction.value.x, y: -direction.value.y };
+      if (!collided) {
+        if (
+          targetPositionX.value < ISLAND_DIMENSIONS.x ||
+          targetPositionX.value > ISLAND_DIMENSIONS.x + ISLAND_DIMENSIONS.w
+        ) {
+          //Hitting from the side
+          newDirection = { x: -direction.value.x, y: direction.value.y };
+        } else {
+          //Hitting the top/bottom
+          newDirection = { x: direction.value.x, y: -direction.value.y };
+        }
+
+        setScore((prev) => prev + 1);
+        collided = true;
       }
-      setScore((prev) => prev + 1);
+    } else {
+      collided = false; // Reset the flag when the ball is not colliding
     }
 
     //Player hit detection
@@ -141,10 +149,15 @@ const Home = () => {
   });
 
   const restartGame = () => {
-    targetPositionX.value = 200;
+    targetPositionX.value = Math.random() * (200 - 10) + 10;
     targetPositionY.value = 200;
     setScore(0);
     setGameOver(false);
+    const newDirection = normalizeVector({
+      x: Math.random() - 0.5,
+      y: Math.random() - 0.5,
+    });
+    direction.value = newDirection;
   };
 
   return (
