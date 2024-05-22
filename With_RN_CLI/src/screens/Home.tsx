@@ -149,10 +149,15 @@ const Home = () => {
   });
 
   const restartGame = () => {
-    targetPositionX.value = 200;
+    targetPositionX.value = Math.random() * (200 - 10) + 10;
     targetPositionY.value = 200;
     setScore(0);
     setGameOver(false);
+    const newDirection = normalizeVector({
+      x: Math.random() - 0.5,
+      y: Math.random() - 0.5,
+    });
+    direction.value = newDirection;
   };
 
   return (
