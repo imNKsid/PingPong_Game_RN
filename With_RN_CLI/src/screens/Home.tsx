@@ -8,12 +8,13 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { COLORS } from "../utils/utils";
 
 const { height, width } = Dimensions.get("window");
 
 const FPS = 60;
 const DELTA = 1000 / FPS;
-const SPEED = 10; //0.3;
+const INITIAL_SPEED = 10; //0.3;
 const BALL_WIDTH = 25;
 const ISLAND_DIMENSIONS = { x: 151, y: 10, w: 128, h: 40 };
 const PLAYER_DIMENSIONS = {
@@ -31,8 +32,11 @@ const Home = () => {
   );
   const playerPos = useSharedValue({ x: width / 4, y: height - 100 });
 
+  const [level, setLevel] = useState(1);
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [speed, setSpeed] = useState(INITIAL_SPEED);
+  const [playerWidth, setPlayerWidth] = useState(PLAYER_DIMENSIONS.w);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -43,6 +47,14 @@ const Home = () => {
 
     return () => clearInterval(interval);
   }, [gameOver]);
+
+  useEffect(() => {
+    if (score > 4 && score % 5 === 0) {
+      setLevel((prevLevel) => prevLevel + 1);
+      setSpeed((prevSpeed) => Math.max(prevSpeed + 4, 30)); // Increase speed with each level
+      setPlayerWidth((prevWidth) => Math.max(prevWidth - 20, 50)); // Decrease player width with each level but not less than 50
+    }
+  }, [score]);
 
   const update = () => {
     let nextPos = getNextPos(direction.value);
@@ -90,14 +102,14 @@ const Home = () => {
 
     //Player hit detection
     if (
-      nextPos.x < playerPos.value.x + PLAYER_DIMENSIONS.w &&
+      nextPos.x < playerPos.value.x + playerWidth &&
       nextPos.x + BALL_WIDTH > playerPos.value.x &&
       nextPos.y < playerPos.value.y + PLAYER_DIMENSIONS.h &&
       BALL_WIDTH + nextPos.y > playerPos.value.y
     ) {
       if (
         targetPositionX.value < playerPos.value.x ||
-        targetPositionX.value > playerPos.value.x + PLAYER_DIMENSIONS.w
+        targetPositionX.value > playerPos.value.x + playerWidth
       ) {
         //Hitting from the side
         newDirection = { x: -direction.value.x, y: direction.value.y };
@@ -121,8 +133,8 @@ const Home = () => {
 
   const getNextPos = (dir: { x: any; y: any }) => {
     return {
-      x: targetPositionX.value + dir.x * SPEED,
-      y: targetPositionY.value + dir.y * SPEED,
+      x: targetPositionX.value + dir.x * speed,
+      y: targetPositionY.value + dir.y * speed,
     };
   };
 
@@ -138,7 +150,7 @@ const Home = () => {
     .onChange((event) => {
       playerPos.value = {
         ...playerPos.value,
-        x: event.absoluteX - PLAYER_DIMENSIONS.w / 2,
+        x: event.absoluteX - playerWidth / 2,
       };
     });
 
@@ -158,10 +170,14 @@ const Home = () => {
       y: Math.random() - 0.5,
     });
     direction.value = newDirection;
+    setLevel(1);
+    setSpeed(INITIAL_SPEED);
+    setPlayerWidth(PLAYER_DIMENSIONS.w);
   };
 
   return (
-    <>
+    <View style={[styles.gameArea, { backgroundColor: COLORS[level - 1] }]}>
+      <Text style={styles.levelStyle}>{`Level ${level}`}</Text>
       <Text style={styles.scoreStyle}>{score}</Text>
       {gameOver ? (
         <Text style={styles.gameOverStyle}>{"Game Over!"}</Text>
@@ -187,7 +203,11 @@ const Home = () => {
       <Animated.View
         style={[
           styles.player,
-          { top: playerPos.value.y, left: playerPos.value.x },
+          {
+            top: playerPos.value.y,
+            left: playerPos.value.x,
+            width: playerWidth,
+          },
           playerAnimatedStyles,
         ]}
       />
@@ -198,13 +218,12 @@ const Home = () => {
           style={{
             width: "100%",
             height: 100,
-            // backgroundColor: "red",
             position: "absolute",
             bottom: 0,
           }}
         />
       </GestureDetector>
-    </>
+    </View>
   );
 };
 
@@ -218,6 +237,11 @@ const normalizeVector = (vector: { x: any; y: any }) => {
 };
 
 const styles = StyleSheet.create({
+  gameArea: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   ball: {
     backgroundColor: "#000",
     width: BALL_WIDTH,
@@ -236,10 +260,16 @@ const styles = StyleSheet.create({
   },
   player: {
     height: PLAYER_DIMENSIONS.h,
-    width: PLAYER_DIMENSIONS.w,
     backgroundColor: "#000",
     position: "absolute",
     borderRadius: 20,
+  },
+  levelStyle: {
+    fontSize: 24,
+    fontWeight: "500",
+    position: "absolute",
+    top: 280,
+    color: "#918d8d",
   },
   scoreStyle: {
     fontSize: 120,
@@ -252,7 +282,7 @@ const styles = StyleSheet.create({
     fontSize: 50,
     fontWeight: "500",
     position: "absolute",
-    top: 230,
+    top: 200,
     color: "red",
   },
 });
